@@ -18,9 +18,9 @@ def read_input(path:str) -> tuple[str, float, float, float]:
     
 def find_answer(f:str, a:float, b:float, l:float) -> str:
     """
-        Определение предела по Липшицу
-        |f(x1) - f(x2)| <= L|x1 - x2|
-    """    
+    Определение выполнения условия Липшица: |f(x1) - f(x2)| <= L * |x1 - x2|
+    Эквивалентно требованию: max |f'(x)| <= L на отрезке [a, b].
+    """ 
     
     if abs(a - b) <= EPSILON:
         return LIP
@@ -33,22 +33,25 @@ def find_answer(f:str, a:float, b:float, l:float) -> str:
                                     "e": sympy.E})
     
     f_prime = sympy.diff(expr, x)
-    
-    fa = expr.subs(x, a).evalf()
-    fb = expr.subs(x, b).evalf()
-    
     f_double = sympy.diff(f_prime, x)
-    roots = sympy.solveset(f_double, x, domain=sympy.Reals)
-    validated_roots = [r for r in roots if r > a and r < b]
-    prime_values = [f_prime.subs(x, v).evalf() for v in validated_roots]
     
-    prime_values.append(fa)
-    prime_values.append(fb)
+    candidate_points = [a, b]
     
-    max_value = float(max(prime_values))
-
+    roots_prime = sympy.solveset(f_prime, x, domain=sympy.Reals)
+    for r in roots_prime:
+        if r.is_real and a < r < b:
+            candidate_points.append(r)
+            
+    roots_double = sympy.solveset(f_double, x, domain=sympy.Reals)
+    for r in roots_double:
+        if r.is_real and a < r < b:
+            candidate_points.append(r)
+            
+    abs_prime_values = [abs(f_prime.subs(x, v).evalf()) for v in candidate_points]
     
-    if abs(max_value - l) <= EPSILON:
+    max_abs_value = float(max(abs_prime_values))
+    
+    if max_abs_value <= l + EPSILON:
         return LIP   
     else:
         return NOT_LIP
