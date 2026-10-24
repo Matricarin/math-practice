@@ -1,70 +1,63 @@
-# липшицева непрерывность
-
+import math
 import sys
 
-import sympy  # type: ignore[import-untyped]
-
 LIP = "LIPSCHITZ"
-NOT_LIP = "NOT LIPSCHITZ" 
+NOT_LIP = "NOT LIPSCHITZ"
 EPSILON = 1e-6
 
-def read_input(path:str) -> tuple[str, float, float, float]:
+def read_input(path: str) -> tuple[str, float, float, float]:
     with open(path) as in_file:
         sys.stdin = in_file
-        f = input()
-        (a, b) = list(map(float, input().split(sep=" ")))
+        f_expr = input()
+        a, b = map(float, input().split())
         l = float(input())
-    return f, a, b, l
-    
-def find_answer(f:str, a:float, b:float, l:float) -> str:
-    """
-    Определение выполнения условия Липшица: |f(x1) - f(x2)| <= L * |x1 - x2|
-    Эквивалентно требованию: max |f'(x)| <= L на отрезке [a, b].
-    """ 
-    
+    return f_expr, a, b, l
+
+def find_answer(f_expr: str, a: float, b: float, l: float) -> str:
     if abs(a - b) <= EPSILON:
         return LIP
     
-    x = sympy.symbols('x')
+    safe_dict = {
+        "sin": math.sin, "cos": math.cos, "exp": math.exp,
+        "log": math.log, "sqrt": math.sqrt, "pi": math.pi, "e": math.e
+    }
     
-    expr = sympy.sympify(f, locals={"sin": sympy.sin, "cos": sympy.cos,
-                                    "exp": sympy.exp, "log": sympy.log,
-                                    "sqrt": sympy.sqrt, "pi": sympy.pi,
-                                    "e": sympy.E})
+    try:
+        f = eval(f'lambda x, e=e: {f_expr}', {"__builtins__": {}}, safe_dict)
+    except Exception:
+        f = eval(f'lambda x, e=math.e: {f_expr}', {"__builtins__": {}}, safe_dict)
+
+    h = 1e-7
+    def f_prime(x):
+        return (f(x + h) - f(x - h)) / (2 * h)
+
+    steps = 200_000
+    step_size = (b - a) / steps
     
-    f_prime = sympy.diff(expr, x)
-    f_double = sympy.diff(f_prime, x)
+    max_abs_prime = 0.0
     
-    candidate_points = [a, b]
-    
-    roots_prime = sympy.solveset(f_prime, x, domain=sympy.Reals)
-    for r in roots_prime:
-        if r.is_real and a < r < b:
-            candidate_points.append(r)
-            
-    roots_double = sympy.solveset(f_double, x, domain=sympy.Reals)
-    for r in roots_double:
-        if r.is_real and a < r < b:
-            candidate_points.append(r)
-            
-    abs_prime_values = [abs(f_prime.subs(x, v).evalf()) for v in candidate_points]
-    
-    max_abs_value = float(max(abs_prime_values))
-    
-    if max_abs_value <= l + EPSILON:
-        return LIP   
+    for i in range(steps + 1):
+        x_val = a + i * step_size
+        try:
+            val = abs(f_prime(x_val))
+            if val > max_abs_prime:
+                max_abs_prime = val
+        except Exception:
+            continue
+
+    if max_abs_prime <= l + EPSILON:
+        return LIP
     else:
         return NOT_LIP
-    
-def write_answer(path:str, answer:str):
+
+def write_answer(path: str, answer: str):
     with open(path, 'w') as out_file:
         sys.stdout = out_file
         print(answer)
 
-
 def main():
-    (f, a, b, l) = read_input('input.txt')
-    answer = find_answer(f, a, b, l)
+    f_expr, a, b, l = read_input('input.txt')
+    answer = find_answer(f_expr, a, b, l)
     write_answer("output.txt", answer)
         
 if __name__ == "__main__":
