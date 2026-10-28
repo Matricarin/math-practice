@@ -1,6 +1,7 @@
 # нахождение экстремумов на заданном интервале
 
 def main():
+    
     (a, b, c, d) = list(map(float, input().split(sep=' ')))
     (p, q) = list(map(float, input().split(sep=' ')))
 

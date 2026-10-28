@@ -1,5 +1,11 @@
 # Backlog: графы
 
+## Темы
+
+1. Основы теории графов
+2. Типы графов
+3. Деревья в теории графов
+
 ## Графические последовательности степеней
 
 **Контекст.** В `../00-lib-example.py` вызов `nx.random_degree_sequence_graph([1, 1, 1])` падает с `NetworkXUnfeasible: degree sequence is not graphical`.
