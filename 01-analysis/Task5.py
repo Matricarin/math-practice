@@ -1,28 +1,53 @@
 # нахождение экстремумов на заданном интервале
 
+import math
+
 def main():
+    
+    EPSILON = 1e-6
     
     (a, b, c, d) = list(map(float, input().split(sep=' ')))
     (p, q) = list(map(float, input().split(sep=' ')))
 
-    x = sp.symbols('x')
-
-    f = a * x ** 3 + b * x ** 2 + c * x + d
-    f_prime = sp.diff(f, x)
-    f_double = sp.diff(f_prime, x)
-
-    criticals = sp.solveset(f_prime, x, domain=sp.Interval(p, q))
+    # начальная функция: a * x ** 3 + b * x ** 2 + c * x + d
     
-    if not criticals or criticals is sp.EmptySet:
+    # ее производная: A * x ** 2 + B * x + C
+    
+    A = 3 * a
+    B = 2 * b
+    C = c
+    
+    roots = []
+    
+    if abs(A) < EPSILON and abs(B) > EPSILON:
+        root = - C / B
+        if p - EPSILON <= root <= q + EPSILON:
+            roots.append(root)
+    elif abs(A) > EPSILON and abs(B) > EPSILON and abs(C) > EPSILON:
+        D = B ** 2 - 4 * A * C
+        if abs(D) < EPSILON:
+            root = - B / 2 * A
+            if p - EPSILON <= root <= q + EPSILON:
+                roots.append(root)
+        elif D >= EPSILON:
+            r_1 = (- B + math.sqrt(D)) / (2 * A)
+            r_2 = (-B - math.sqrt(D)) / (2 * A)
+            if p - EPSILON <= r_1 <= q + EPSILON:
+                roots.append(r_1)
+            if p - EPSILON <= r_2 <= q + EPSILON:
+                roots.append(r_2)
+
+    
+    if not roots or len(roots) == 0:
         print("No critical points found.")
         return
-
-    critical_points = sorted([float(r) for r in criticals])
+    
+    roots.sort()
         
-    for r in critical_points:
-        f_double_val = float(f_double.subs(x, r))
+    for r in roots:
+        f_double_val = 6 * a * r + 2 * b
         
-        f_val = float(f.subs(x, r))
+        f_val = a * r ** 3 + b * r ** 2 + c * r + d
         
         if abs(f_double_val) < 1e-7:
             nature = "Saddle point"
