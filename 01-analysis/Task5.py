@@ -23,7 +23,7 @@ def main():
         root = - C / B
         if p - EPSILON <= root <= q + EPSILON:
             roots.append(root)
-    elif abs(A) > EPSILON and abs(B) > EPSILON and abs(C) > EPSILON:
+    elif abs(A) > EPSILON and abs(B) > EPSILON:
         D = B ** 2 - 4 * A * C
         if abs(D) < EPSILON:
             root = - B / 2 * A
