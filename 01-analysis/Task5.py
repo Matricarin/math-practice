@@ -1,7 +1,4 @@
 # нахождение экстремумов на заданном интервале
-# проблема: неиспользовать sympy!
-
-import sympy as sp
 
 def main():
     (a, b, c, d) = list(map(float, input().split(sep=' ')))
